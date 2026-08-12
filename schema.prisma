@@ -1,0 +1,126 @@
+// Prisma Schema for PromptForge AI Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String
+  password  String
+  createdAt DateTime  @default(now())
+  articles  Article[]
+}
+
+enum Category {
+  seo
+  technical
+  tutorial
+  academic
+  news
+  explainer
+  case_study
+  product_review
+  documentation
+  linkedin
+  general
+}
+
+model PromptTemplate {
+  id                 Int               @id @default(autoincrement())
+  name               String
+  slug               String            @unique
+  description        String
+  category           Category          @default(general)
+  systemPrompt       String
+  userPromptTemplate String
+  variables          Json              @default("[]")
+  version            Int               @default(1)
+  isDefault          Boolean           @default(false)
+  isActive           Boolean           @default(true)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  articles           Article[]
+  versions           TemplateVersion[]
+}
+
+model TemplateVersion {
+  id                 Int            @id @default(autoincrement())
+  templateId         Int
+  template           PromptTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  version            Int
+  systemPrompt       String
+  userPromptTemplate String
+  variables          Json           @default("[]")
+  changelog          String?
+  createdAt          DateTime       @default(now())
+
+  @@unique([templateId, version])
+}
+
+enum PipelineMode {
+  direct
+  multi_stage
+}
+
+enum ArticleStatus {
+  draft
+  completed
+  failed
+}
+
+model Article {
+  id                     Int                @id @default(autoincrement())
+  userId                 Int?
+  user                   User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  templateId             Int?
+  template               PromptTemplate?    @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  title                  String
+  topic                  String
+  targetAudience         String             @default("General Audience")
+  tone                   String             @default("Professional")
+  language               String             @default("English")
+  targetLength           String             @default("Medium (~1000 words)")
+  variablesValues        Json               @default("{}")
+  outline                String?
+  content                String
+  status                 ArticleStatus      @default(completed)
+  generationPipelineUsed PipelineMode       @default(direct)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  evaluation             ArticleEvaluation?
+  logs                   GenerationLog[]
+}
+
+model ArticleEvaluation {
+  id                Int      @id @default(autoincrement())
+  articleId         Int      @unique
+  article           Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  relevanceScore    Int      @default(85)
+  structureScore    Int      @default(85)
+  readabilityScore  Int      @default(85)
+  completenessScore Int      @default(85)
+  seoScore          Int      @default(85)
+  overallScore      Int      @default(85)
+  feedbackJson      Json     @default("{}")
+  createdAt         DateTime @default(now())
+}
+
+model GenerationLog {
+  id               Int      @id @default(autoincrement())
+  articleId        Int?
+  article          Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  actionType       String
+  promptUsed       String
+  systemPromptUsed String
+  modelName        String   @default("gemini-2.5-flash")
+  tokensUsed       Int      @default(0)
+  durationMs       Int      @default(0)
+  createdAt        DateTime @default(now())
+}

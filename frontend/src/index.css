@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Glassmorphism utility card */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Markdown Render Styling */
+.prose-dark {
+  color: #cbd5e1;
+}
+
+.prose-dark h1 {
+  @apply text-3xl font-extrabold text-white mb-4 mt-6 border-b border-slate-800 pb-2;
+}
+
+.prose-dark h2 {
+  @apply text-2xl font-bold text-slate-100 mb-3 mt-6 border-b border-slate-800/60 pb-1;
+}
+
+.prose-dark h3 {
+  @apply text-xl font-semibold text-indigo-300 mb-2 mt-4;
+}
+
+.prose-dark p {
+  @apply leading-relaxed mb-4 text-slate-300;
+}
+
+.prose-dark ul {
+  @apply list-disc list-inside mb-4 space-y-1 text-slate-300;
+}
+
+.prose-dark ol {
+  @apply list-decimal list-inside mb-4 space-y-1 text-slate-300;
+}
+
+.prose-dark blockquote {
+  @apply border-l-4 border-indigo-500 pl-4 py-1 italic my-4 bg-indigo-950/30 text-indigo-200 rounded-r;
+}
+
+.prose-dark code {
+  @apply bg-slate-900 text-indigo-300 px-1.5 py-0.5 rounded text-sm font-mono border border-slate-800;
+}
+
+.prose-dark pre {
+  @apply bg-slate-900 p-4 rounded-lg my-4 overflow-x-auto border border-slate-800 font-mono text-sm;
+}
+
+.prose-dark table {
+  @apply w-full text-left border-collapse my-6 text-sm;
+}
+
+.prose-dark th {
+  @apply bg-slate-900 border-b border-slate-700 p-3 font-semibold text-indigo-300;
+}
+
+.prose-dark td {
+  @apply border-b border-slate-800/80 p-3 text-slate-300;
+}
+
+.prose-dark hr {
+  @apply border-slate-800 my-8;
+}
