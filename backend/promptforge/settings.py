@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['your-backend.onrender.com', 'your-frontend.vercel.app']
+ALLOWED_HOSTS = ['https://promptforgeai1.onrender.com', 'https://prompt-forge-ai-eta.vercel.app/']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -135,7 +135,7 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://your-frontend.vercel.app",
+    "https://prompt-forge-ai-eta.vercel.app/",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
