@@ -222,3 +222,4 @@ DATABASE_URL=postgresql://postgres:postgrespassword@localhost:5432/promptforge_d
 
 ## 📄 License
 This project is open-source under the MIT License.
+# PromptForgeAI
