@@ -9,11 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 load_dotenv(BASE_DIR.parent / '.env')
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-promptforge-ai-super-secret-key-2026')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['your-backend.onrender.com', 'your-frontend.vercel.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -134,8 +134,16 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://your-frontend.vercel.app",
+]
 CORS_ALLOW_CREDENTIALS = True
+
 
 # Google Gemini API key
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_API_MODEL = "gemini-3.6-flash"
+MAX_RETRIES = 5 
+TIMEOUT = 60
+ENABLE_STREAMING = True
+

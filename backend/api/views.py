@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Count, Sum
 from django.utils.text import slugify
 
+from django.http import JsonResponse
+
 from .models import PromptTemplate, TemplateVersion, Article, ArticleEvaluation, GenerationLog
 from .serializers import (
     UserSerializer, UserRegisterSerializer,
@@ -319,11 +321,12 @@ def dashboard_stats(request):
     })
 
 
+
 def _checkAPIStatus_(request):
-    text, call_status = AIService._call_gemini(
-        system_instruction="You are a health check assistant.",
-        user_prompt="Reply with the word OK."
-    )
-    if call_status == "SUCCESS":
-        return Response({'status': 'online'}, status=200)
-    return Response({'status': 'offline', 'reason': call_status}, status=503)
+    status, result = AIService.API_STATUS()
+    if status:
+        print("API connection status Online")
+        return JsonResponse({"status": "online", "message": result})
+    else:
+        print(f"API connection status {status} an error '{result}'")
+        return JsonResponse({"status": "offline", "error": result})
