@@ -36,7 +36,7 @@ class AIService:
 
         # 1. Try google-generativeai SDK if available
         try:
-            import google.generativeai as genai
+            import google.genai as genai
             genai.configure(api_key=api_key)
             for model in model_candidates:
                 print("Checking model:", model)
@@ -65,7 +65,7 @@ class AIService:
 
         # 1. Try google-generativeai SDK if available
         try:
-            import google.generativeai as genai
+            import google.genai as genai
             genai.configure(api_key=api_key)
             for model_name in model_candidates:
                 attempt = 0
