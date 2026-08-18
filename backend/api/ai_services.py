@@ -38,10 +38,10 @@ class AIService:
 
         # 1. Try google-genai SDK if available
         try:
-            import google.generativeai as genai
+            from google import genai
             client = genai.Client(api_key=api_key)
             for model in model_candidates:  
-                print("Calling URL:", url)
+                print("Checking model:", model)
                 result=client.models.generate_content(
                     model=model,
                     contents="Explain how AI works in a few words"
