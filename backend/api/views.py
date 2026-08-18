@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Count, Sum
 from django.utils.text import slugify
 
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 
 from .models import PromptTemplate, TemplateVersion, Article, ArticleEvaluation, GenerationLog
 from .serializers import (
@@ -20,6 +20,8 @@ from .serializers import (
 from .prompt_engine import PromptEngine
 from .ai_services import AIService
 
+def falseroute(request):
+    return HttpResponse("This is not the site you are looking for")
 # Authentication Endpoints
 @api_view(['POST'])
 @permission_classes([AllowAny])

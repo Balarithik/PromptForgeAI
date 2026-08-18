@@ -24,3 +24,7 @@ media/
 
 # Logs
 *.log
+
+#Bytecode
+promptforge/production_settings.py
+production_manage.py
