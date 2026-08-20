@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'BACKEND_URL',
+        target: 'https://promptforgeai1.onrender.com',
         changeOrigin: true,
       }
     }
