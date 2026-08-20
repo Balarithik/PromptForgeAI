@@ -141,7 +141,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://promptforgeai1.onrender.com",
-    "https://prompt-forge-ai-eta.vercel.app"
+    "https://promptforgeai.onrender.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
