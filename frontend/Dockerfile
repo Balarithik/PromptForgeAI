@@ -19,4 +19,4 @@ COPY package*.json ./
 
 EXPOSE 3000
 
-CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["npm", "run", "dev"]
