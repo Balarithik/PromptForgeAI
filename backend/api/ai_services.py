@@ -21,13 +21,10 @@ class AIService:
         "gemini-2.5-flash-lite"
     ]
 
-
-    # Configurable defaults (can be overridden via env or Django settings)
     DEFAULT_MODEL = os.environ.get('GEMINI_API_MODEL') or getattr(settings, 'GEMINI_API_MODEL', MODEL_CANDIDATES[0])
     MAX_RETRIES = int(os.environ.get('GEMINI_MAX_RETRIES', getattr(settings, 'GEMINI_MAX_RETRIES', 5)))
     TIMEOUT = int(os.environ.get('GEMINI_TIMEOUT', getattr(settings, 'GEMINI_TIMEOUT', 60)))
     ENABLE_STREAMING = os.environ.get('GEMINI_ENABLE_STREAMING', getattr(settings, 'GEMINI_ENABLE_STREAMING', 'false')).lower() in ('1', 'true', 'yes')
-
 
     def API_STATUS(MODEL_CANDIDATES=MODEL_CANDIDATES):
         api_key = getattr(settings, 'GEMINI_API_KEY', '') or os.environ.get('GEMINI_API_KEY', '')
@@ -38,28 +35,22 @@ class AIService:
 
         model_candidates = [x for x in MODEL_CANDIDATES]
 
-        # 1. Try google-genai SDK if available
         try:
             from google import genai
             client = genai.Client(api_key=api_key)
             for model in model_candidates:
-                result=client.models.generate_content(
-                    model=model,
-                    contents="Explain how AI works in a few words"
-                )
-                if result:
-                    return True,f'Successful with model {model}'
+                chat = client.chats.create(model=model)
+                chat.send_message("Explain how AI works in a few words")
+                result = chat.send_message("OK")
+                if result and hasattr(result, 'text'):
+                    return True, f'Successful with model {model}'
                 else:
-                    return False,'Failed'
-        except Exception as e :
-            return False,f"An Error Occured {e}"
+                    return False, 'Failed'
+        except Exception as e:
+            return False, f"An Error Occured {e}"
 
     @classmethod
     def _call_gemini(cls, system_instruction, user_prompt, model: Optional[str] = None, streaming: bool = False):
-        """
-        Calls Google Gemini API server-side using google-genai SDK or direct REST endpoints.
-        Tries valid Gemini model candidates (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash) in order.
-        """
         api_key = getattr(settings, 'GEMINI_API_KEY', '') or os.environ.get('GEMINI_API_KEY', '')
 
         if not api_key:
@@ -68,7 +59,6 @@ class AIService:
 
         model_candidates = [model] if model else cls.MODEL_CANDIDATES
 
-        # 1. Try google-genai SDK if available
         try:
             from google import genai
             client = genai.Client(api_key=api_key)
@@ -76,36 +66,38 @@ class AIService:
                 attempt = 0
                 while attempt < cls.MAX_RETRIES:
                     try:
-                        # SDK usage: prefer the SDK convenience method when available
-                        # Keep call shape conservative to match both older and newer SDK surfaces
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=user_prompt,
-                            config={"system_instruction": system_instruction}
-                        )
-                        # Some SDKs return .text, others provide structured candidates
-                        text = None
-                        if response is None:
+                        chat = client.chats.create(model=model_name)
+                        # Send system instruction first
+                        chat.send_message(system_instruction)
+                        # Then send user prompt
+                        if streaming:
+                            text = ""
+                            for chunk in chat.send_message_stream(user_prompt):
+                                if hasattr(chunk, 'text'):
+                                    text += chunk.text
+                            if text:
+                                print(f"[Gemini API SDK Success] Generated content using model '{model_name}' (streaming)")
+                                return text, "SUCCESS"
+                        else:
+                            response = chat.send_message(user_prompt)
                             text = None
-                        elif hasattr(response, 'text'):
-                            text = response.text
-                        elif isinstance(response, dict):
-                            # Try to normalize dict responses
-                            candidates = response.get('candidates') or response.get('outputs')
-                            if candidates and isinstance(candidates, list):
-                                first = candidates[0]
-                                # Different SDK versions use different keys
-                                text = first.get('content') or first.get('text') or first.get('output')
+                            if response is None:
+                                text = None
+                            elif hasattr(response, 'text'):
+                                text = response.text
+                            elif isinstance(response, dict):
+                                candidates = response.get('candidates') or response.get('outputs')
+                                if candidates and isinstance(candidates, list):
+                                    first = candidates[0]
+                                    text = first.get('content') or first.get('text') or first.get('output')
 
-                        if text:
-                            print(f"[Gemini API SDK Success] Generated content using model '{model_name}'")
-                            return text, "SUCCESS"
+                            if text:
+                                print(f"[Gemini API SDK Success] Generated content using model '{model_name}'")
+                                return text, "SUCCESS"
 
-                        # If we reached here without text, break retry loop for this model
                         break
                     except Exception as e:
                         attempt += 1
-                        # Retry on transient failures
                         if attempt < cls.MAX_RETRIES:
                             backoff = (2 ** attempt) + random.random()
                             print(f"[Gemini SDK transient error] attempt {attempt} for {model_name}: {e}; retrying in {backoff:.1f}s")
@@ -115,11 +107,9 @@ class AIService:
                             print(f"[Gemini SDK Candidate Error] Model '{model_name}' failed after {attempt} attempts: {e}")
                             break
         except ImportError:
-            # SDK not installed; will fall back to REST
             pass
 
-        # 2. Fallback to direct HTTP REST calls across model candidates
-        # 2. Fallback to direct HTTP REST calls across model candidates
+        # REST fallback remains unchanged
         headers = {'Content-Type': 'application/json'}
         payload = {
             "system_instruction": {
@@ -148,7 +138,6 @@ class AIService:
                         data = response.json()
                         candidates = data.get('candidates', [])
                         if candidates:
-                            # Some responses place text under content.parts[].text
                             first = candidates[0]
                             content = first.get('content') or first.get('output') or first
                             if isinstance(content, dict):
@@ -161,11 +150,9 @@ class AIService:
                                         return text, "SUCCESS"
                             elif isinstance(content, str):
                                 return content, "SUCCESS"
-                        # If not found, treat as failure for this model
                         print(f"[Gemini REST Warning] Model '{model_name}' returned 200 but no text candidate found: {data}")
                         break
                     else:
-                        # Retry on throttling and server errors
                         status = response.status_code
                         text_snip = (response.text or '')[:200]
                         if status in (429, 500, 502, 503, 504) and attempt + 1 < cls.MAX_RETRIES:
