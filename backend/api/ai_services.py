@@ -43,14 +43,15 @@ class AIService:
                 chat.send_message("Explain how AI works in a few words")
                 result = chat.send_message("OK")
                 if result and hasattr(result, 'text'):
-                    return True, f'Successful with model {model}'
-                else:
-                    return False, 'Failed'
+                    global DEFAULT_MODEL
+                    DEFAULT_MODEL=model
+                    return True, model
+            return False, 'Failed'
         except Exception as e:
             return False, f"An Error Occured {e}"
 
     @classmethod
-    def _call_gemini(cls, system_instruction, user_prompt, model: Optional[str] = None, streaming: bool = False):
+    def _call_gemini(cls, system_instruction, user_prompt, model: Optional[str] = DEFAULT_MODEL, streaming: bool = False):
         api_key = getattr(settings, 'GEMINI_API_KEY', '') or os.environ.get('GEMINI_API_KEY', '')
 
         if not api_key:
