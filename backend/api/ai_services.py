@@ -24,7 +24,7 @@ class AIService:
 
     # Configurable defaults (can be overridden via env or Django settings)
     DEFAULT_MODEL = os.environ.get('GEMINI_API_MODEL') or getattr(settings, 'GEMINI_API_MODEL', MODEL_CANDIDATES[0])
-    MAX_RETRIES = int(os.environ.get('GEMINI_MAX_RETRIES', getattr(settings, 'GEMINI_MAX_RETRIES', 5)))
+    MAX_RETRIES = int(os.environ.get('GEMINI_MAX_RETRIES', getattr(settings, 'GEMINI_MAX_RETRIES', 3)))
     TIMEOUT = int(os.environ.get('GEMINI_TIMEOUT', getattr(settings, 'GEMINI_TIMEOUT', 60)))
     ENABLE_STREAMING = os.environ.get('GEMINI_ENABLE_STREAMING', getattr(settings, 'GEMINI_ENABLE_STREAMING', 'false')).lower() in ('1', 'true', 'yes')
 
@@ -48,14 +48,15 @@ class AIService:
                     contents="Explain how AI works in a few words"
                 )
                 if result:
+                    global DEFAULT_MODEL
+                    DEFAULT_MODEL = model
                     return True,model
-                else:
-                    return False,'Failed'
+            return False,'Failed'
         except Exception as e :
-            return False,f"An Error Occured {e}"
+            return False,f"An Error Occured {e}"    
 
     @classmethod
-    def _call_gemini(cls, system_instruction, user_prompt, model: Optional[str] = None, streaming: bool = False):
+    def _call_gemini(cls, system_instruction, user_prompt, model: Optional[str] = DEFAULT_MODEL, streaming: bool = False):
         """
         Calls Google Gemini API server-side using google-genai SDK or direct REST endpoints.
         Tries valid Gemini model candidates (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash) in order.
@@ -66,7 +67,7 @@ class AIService:
             print("[Gemini API Service] Notice: GEMINI_API_KEY is missing in backend environment / .env file.")
             return None, "NO_API_KEY"
 
-        model_candidates = [model] if model else cls.MODEL_CANDIDATES
+        model_candidates = model
 
         # 1. Try google-genai SDK if available
         try:
