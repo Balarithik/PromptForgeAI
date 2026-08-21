@@ -60,7 +60,6 @@ export const apiService = {
   },
   APIStatus: async () => {
     const res = await client.get('/APIStatus/');
-    alert(JSON.stringify(res.data));
     return res.data;
   },
 

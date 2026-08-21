@@ -327,7 +327,7 @@ def dashboard_stats(request):
 def _checkAPIStatus_(request):
     status, result = AIService.API_STATUS()
     if status:
-        print("API connection status Online")
+        print(f"API connection status Online {result}")
         return JsonResponse({"status": "online", "message": result})
     else:
         print(f"API connection status {status} an error '{result}'")

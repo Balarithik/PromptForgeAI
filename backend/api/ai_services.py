@@ -16,7 +16,9 @@ class AIService:
         "gemini-3.6-flash",
         "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
-        "gemini-3.1-flash-lite"
+        "gemini-3.1-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
     ]
 
 
@@ -46,7 +48,7 @@ class AIService:
                     contents="Explain how AI works in a few words"
                 )
                 if result:
-                    return True,f'Successful with model {model}'
+                    return True,model
                 else:
                     return False,'Failed'
         except Exception as e :
