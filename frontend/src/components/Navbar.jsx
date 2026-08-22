@@ -46,7 +46,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
         <div className="flex items-center space-x-3 sm:space-x-4">
           <div className="hidden md:flex items-center space-x-2 rounded-full bg-slate-900 px-3 py-1 border border-slate-800 text-xs text-slate-300">
             <Cpu className="h-3.5 w-3.5 text-indigo-400" />
-            <span>LLM: <strong className="text-white font-medium">{apiStatus.model}</strong></span>
+            <span>LLM: <strong className="text-white font-medium">{apiStatus.status === 'online' ? `${apiStatus.model}` : 'connecting ...'}</strong></span>
             <span className="flex h-2 w-2 relative">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${apiStatus.status === 'online' ? 'bg-emerald-400 opacity-75' : 'bg-red-400 opacity-75'}`} ></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${apiStatus.status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
